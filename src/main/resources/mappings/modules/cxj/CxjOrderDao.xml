@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.thinkgem.jeesite.modules.cxj.dao.CxjOrderDao">
+    
+	<sql id="cxjOrderColumns">
+		a.id AS "id",
+		a.order_on AS "orderOn",
+		a.customer AS "customer",
+		a.logistics_create_time AS "logisticsCreateTime",
+		a.logistics_status AS "logisticsStatus",
+		a.requirement AS "requirement",
+		a.other_functions AS "otherFunctions",
+		a.notice AS "notice",
+		a.notice_name AS "noticeName",
+		a.create_by AS "createBy.id",
+		a.create_date AS "createDate",
+		a.update_by AS "updateBy.id",
+		a.update_date AS "updateDate",
+		a.remarks AS "remarks",
+		a.del_flag AS "delFlag"
+	</sql>
+	
+	<sql id="cxjOrderJoins">
+	</sql>
+    
+	<select id="get" resultType="CxjOrder">
+		SELECT 
+			<include refid="cxjOrderColumns"/>
+		FROM cxj_order a
+		<include refid="cxjOrderJoins"/>
+		WHERE a.id = #{id}
+	</select>
+	
+	<select id="findList" resultType="CxjOrder">
+		SELECT 
+			<include refid="cxjOrderColumns"/>
+		FROM cxj_order a
+		<include refid="cxjOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+			<if test="orderOn != null and orderOn != ''">
+				AND a.order_on LIKE 
+					<if test="dbName == 'oracle'">'%'||#{orderOn}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{orderOn}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{orderOn},'%')</if>
+			</if>
+			<if test="customer != null and customer != ''">
+				AND a.customer LIKE 
+					<if test="dbName == 'oracle'">'%'||#{customer}||'%'</if>
+					<if test="dbName == 'mssql'">'%'+#{customer}+'%'</if>
+					<if test="dbName == 'mysql'">concat('%',#{customer},'%')</if>
+			</if>
+		</where>
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="findAllList" resultType="CxjOrder">
+		SELECT 
+			<include refid="cxjOrderColumns"/>
+		FROM cxj_order a
+		<include refid="cxjOrderJoins"/>
+		<where>
+			a.del_flag = #{DEL_FLAG_NORMAL}
+		</where>		
+		<choose>
+			<when test="page !=null and page.orderBy != null and page.orderBy != ''">
+				ORDER BY ${page.orderBy}
+			</when>
+			<otherwise>
+				ORDER BY a.update_date DESC
+			</otherwise>
+		</choose>
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cxj_order(
+			id,
+			order_on,
+			customer,
+			logistics_create_time,
+			logistics_status,
+			requirement,
+			other_functions,
+			notice,
+			notice_name,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			remarks,
+			del_flag
+		) VALUES (
+			#{id},
+			#{orderOn},
+			#{customer},
+			#{logisticsCreateTime},
+			#{logisticsStatus},
+			#{requirement},
+			#{otherFunctions},
+			#{notice},
+			#{noticeName},
+			#{createBy.id},
+			#{createDate},
+			#{updateBy.id},
+			#{updateDate},
+			#{remarks},
+			#{delFlag}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE cxj_order SET 	
+			customer = #{customer},
+			logistics_create_time = #{logisticsCreateTime},
+			logistics_status = #{logisticsStatus},
+			requirement = #{requirement},
+			other_functions = #{otherFunctions},
+			notice = #{notice},
+			notice_name = #{noticeName},
+			update_by = #{updateBy.id},
+			update_date = #{updateDate},
+			remarks = #{remarks}
+		WHERE id = #{id}
+	</update>
+	
+	<update id="delete">
+		UPDATE cxj_order SET 
+			del_flag = #{DEL_FLAG_DELETE}
+		WHERE id = #{id}
+	</update>
+	
+</mapper>
